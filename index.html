@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<title>Analizador de Extracto de Tarjeta</title>
+<style>
+  body{font-family:system-ui,Segoe UI,Arial,sans-serif;background:#0f172a;color:#e2e8f0;margin:0;min-height:100vh;display:flex;align-items:center;justify-content:center}
+  .card{background:#1e293b;padding:40px 48px;border-radius:16px;box-shadow:0 20px 60px rgba(0,0,0,.4);max-width:520px;width:90%}
+  h1{margin:0 0 8px;font-size:24px}
+  p{color:#94a3b8;margin:0 0 24px}
+  input[type=file]{display:block;width:100%;padding:14px;background:#0f172a;border:2px dashed #334155;border-radius:10px;color:#e2e8f0;margin-bottom:20px}
+  button{background:#3b82f6;color:white;border:0;padding:14px 28px;border-radius:10px;font-size:16px;font-weight:600;cursor:pointer;width:100%}
+  button:hover{background:#2563eb}
+  .flash{background:#7f1d1d;padding:10px;border-radius:8px;margin-bottom:16px}
+</style>
+</head>
+<body>
+<div class="card">
+  <h1>📊 Analizador de Extracto</h1>
+  <p>Subí el PDF del extracto de tu tarjeta y obtené un resumen agrupado por comercio.</p>
+  {% with messages = get_flashed_messages() %}
+    {% for m in messages %}<div class="flash">{{m}}</div>{% endfor %}
+  {% endwith %}
+  <form action="/analizar" method="post" enctype="multipart/form-data">
+    <input type="file" name="pdf" accept="application/pdf" required>
+    <button type="submit">Analizar PDF</button>
+  </form>
+</div>
+</body>
+</html>

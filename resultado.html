@@ -1,0 +1,116 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<title>Resultado del análisis</title>
+<style>
+  body{font-family:system-ui,Segoe UI,Arial,sans-serif;background:#0f172a;color:#e2e8f0;margin:0;padding:32px}
+  .container{max-width:960px;margin:0 auto}
+  h1{margin:0 0 4px}
+  .meta{color:#94a3b8;margin-bottom:24px}
+  .grid{display:grid;grid-template-columns:1fr 1fr;gap:24px;margin-bottom:24px}
+  @media(max-width:760px){.grid{grid-template-columns:1fr}}
+  .panel{background:#1e293b;padding:24px;border-radius:14px}
+  .panel h2{margin:0 0 16px;font-size:18px;color:#60a5fa}
+  table{width:100%;border-collapse:collapse}
+  th,td{text-align:left;padding:10px 12px;border-bottom:1px solid #334155;font-size:14px}
+  th{color:#94a3b8;font-weight:600;text-transform:uppercase;font-size:12px;letter-spacing:.05em}
+  td.right,th.right{text-align:right;font-variant-numeric:tabular-nums}
+  .total-row{background:#0f172a;font-weight:700;font-size:16px;color:#fbbf24}
+  .badge{display:inline-block;background:#334155;border-radius:999px;padding:2px 8px;font-size:11px;margin-left:6px;color:#cbd5e1}
+  a.back{color:#60a5fa;text-decoration:none}
+  a.back:hover{text-decoration:underline}
+  .resumen-row td:last-child{text-align:right;font-weight:600}
+  .btn-detalle{background:#334155;color:#e2e8f0;border:none;border-radius:6px;padding:6px 12px;font-size:12px;cursor:pointer;font-weight:600}
+  .btn-detalle:hover{background:#475569}
+  .detalle-row{background:#0b1220}
+  .detalle-row td{padding:0}
+  .detalle-inner{padding:12px 20px}
+  .detalle-inner table{margin:0}
+  .detalle-inner th,.detalle-inner td{font-size:13px;border-bottom:1px solid #1e293b;padding:6px 8px}
+  .detalle-inner th{color:#64748b}
+  .hidden{display:none}
+</style>
+<script>
+function toggleDetalle(i){
+  var r = document.getElementById('detalle-'+i);
+  var b = document.getElementById('btn-'+i);
+  if(r.classList.contains('hidden')){ r.classList.remove('hidden'); b.textContent='Ocultar'; }
+  else { r.classList.add('hidden'); b.textContent='Ver detalles'; }
+}
+</script>
+</head>
+<body>
+<div class="container">
+  <a class="back" href="/">← Subir otro PDF</a>
+  <h1>Resultado del análisis</h1>
+  <div class="meta">
+    {% if titular %}<strong>{{ titular }}</strong>{% endif %}
+    {% if tarjeta %} · Tarjeta {{ tarjeta }}{% endif %}
+    · {{ num_trans }} transacciones detectadas
+  </div>
+
+  <div class="grid">
+    <div class="panel">
+      <h2>💳 Resumen estado financiero</h2>
+      <table>
+        {% for label, val in resumen %}
+        <tr class="resumen-row"><td>{{ label }}</td><td>Gs {{ val }}</td></tr>
+        {% endfor %}
+      </table>
+    </div>
+
+    <div class="panel">
+      <h2>📈 Total gastado en comercios</h2>
+      <p style="font-size:32px;margin:0;color:#fbbf24;font-weight:700">Gs {{ fmt(total) }}</p>
+      <p style="color:#94a3b8;margin-top:6px">Suma de todas las compras agrupadas (excluye pagos, intereses e IVA).</p>
+    </div>
+  </div>
+
+  <div class="panel">
+    <h2>🏪 Gastos por comercio (mayor a menor)</h2>
+    <table>
+      <thead>
+        <tr><th>Comercio</th><th class="right">Operaciones</th><th class="right">Total Gs</th><th class="right">Detalle</th></tr>
+      </thead>
+      <tbody>
+        {% for row in agrupado %}
+        <tr>
+          <td>{{ row.comercio }}</td>
+          <td class="right">{{ row.count }}</td>
+          <td class="right">{{ fmt(row.total) }}</td>
+          <td class="right"><button class="btn-detalle" id="btn-{{ loop.index }}" onclick="toggleDetalle({{ loop.index }})">Ver detalles</button></td>
+        </tr>
+        <tr class="detalle-row hidden" id="detalle-{{ loop.index }}">
+          <td colspan="4">
+            <div class="detalle-inner">
+              <table>
+                <thead>
+                  <tr><th>Fecha</th><th>Detalle original</th><th class="right">Monto Gs</th></tr>
+                </thead>
+                <tbody>
+                  {% for it in row["items"] %}
+                  <tr>
+                    <td>{{ it.fecha }}</td>
+                    <td>{{ it.detalle }}</td>
+                    <td class="right">{{ fmt(it.monto) }}</td>
+                  </tr>
+                  {% endfor %}
+                </tbody>
+              </table>
+            </div>
+          </td>
+        </tr>
+        {% endfor %}
+        <tr class="total-row">
+          <td>TOTAL</td>
+          <td class="right">{{ agrupado|length }}</td>
+          <td class="right">Gs {{ fmt(total) }}</td>
+          <td></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+</body>
+</html>
